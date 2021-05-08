@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.haolin.swift.downloader.library">
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <application>
+        <service
+            android:name=".core.downloader.ForegroundServiceDownloader"
+            android:enabled="true"
+            android:exported="true" />
+
+        <receiver
+            android:name=".receiver.ResumeReceiver"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".receiver.CancelAllReceiver"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".receiver.CancelReceiver"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".receiver.OpenFileReceiver"
+            android:enabled="true"
+            android:exported="true" />
+        <receiver
+            android:name=".receiver.StopReceiver"
+            android:enabled="true"
+            android:exported="true" />
+    </application>
+</manifest>
