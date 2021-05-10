@@ -6,7 +6,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -83,19 +82,12 @@ class MainActivity : AppCompatActivity() {
                     }
                     val pendingIntent = PendingIntent.getActivities(this@MainActivity,0,
                         arrayOf(intent),PendingIntent.FLAG_UPDATE_CURRENT)
-                    val bitmap = BitmapFactory.decodeFile("$filePath/$fileName")
                     NotificationCompat.Builder(context, resources.getString(R.string.app_name))
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContent(remoteViews)
-//                        .setStyle(
-//                            NotificationCompat.BigPictureStyle()
-//                                .bigPicture(bitmap)
-//                                .bigLargeIcon(null)
-//                        )
                         .setContentIntent(pendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .build()
-
                 } else {
                     NotificationCompat.Builder(context, resources.getString(R.string.app_name))
                         .setSmallIcon(R.mipmap.ic_launcher)
