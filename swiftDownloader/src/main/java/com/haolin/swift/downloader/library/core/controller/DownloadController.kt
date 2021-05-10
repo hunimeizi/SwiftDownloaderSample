@@ -3,7 +3,7 @@ package com.haolin.swift.downloader.library.core.controller
 
 class DownloadController {
     private var workState =
-        WorkState.RUNNING
+        WorkState.STOP
     @Synchronized
     fun pause() {
         workState = WorkState.STOP

@@ -77,8 +77,8 @@ object SwiftDownloader {
 
     }
 
-    fun enqueue(url: String, filePath: String, fileName: String): SwiftDownloader {
-        realDownloader?.enqueue(url, filePath, fileName)
+    fun enqueue(singleTask: Boolean,url: String, filePath: String, fileName: String): SwiftDownloader {
+        realDownloader?.enqueue(singleTask,url, filePath, fileName)
         return this
     }
 
@@ -90,6 +90,9 @@ object SwiftDownloader {
         realDownloader?.resumeAndStart()
     }
 
+    fun deleteByUrl(url: String) {
+        realDownloader?.deleteByUrl(url)
+    }
     fun cancelAll() {
         realDownloader?.cancelAll()
     }

@@ -18,6 +18,9 @@ interface TaskInfoDao {
     @Update
     suspend fun update(vararg taskInfo: TaskInfo)
 
+    @Query("select * from TaskInfo where url = :url")
+    suspend fun findByUrls(url:String): TaskInfo?
+
     @Query("select * from TaskInfo")
     suspend fun queryAll(): MutableList<TaskInfo>
 
@@ -39,6 +42,12 @@ interface TaskInfoDao {
     @Query("delete from TaskInfo where id=:taskInfoID")
     suspend fun deleteByID(taskInfoID: Long)
 
+    @Query("delete from TaskInfo where url=:url")
+    suspend fun deleteByUrl(url:String)
+
     @Query("delete from TaskInfo where status between $TASK_STATUS_UNINITIALIZED and $TASK_STATUS_UNFINISHED")
     suspend fun deleteAllUnfinishedTaskInfo()
+
+    @Query("delete from TaskInfo")
+    suspend fun deleteAllTaskInfo()
 }

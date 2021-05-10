@@ -17,6 +17,7 @@ class DownloadTaskManager(private val appContext: Context) {
 
     private val dao by lazy { database.getTaskInfoDao() }
 
+    suspend fun findByUrls(url: String): TaskInfo? = dao.findByUrls(url)
     suspend fun getAllTaskInfo(): MutableList<TaskInfo> = dao.queryAll()
     suspend fun getUnfinishedTaskInfo(): MutableList<TaskInfo> = dao.queryUnfinished()
 
@@ -50,7 +51,11 @@ class DownloadTaskManager(private val appContext: Context) {
         dao.deleteByID(id)
     }
 
-    suspend fun deleteAllUnfinishedTaskInfo() {
-        dao.deleteAllUnfinishedTaskInfo()
+    suspend fun deleteAllTaskInfo() {
+        dao.deleteAllTaskInfo()
+    }
+
+    suspend fun deleteByUrl(url: String) {
+        dao.deleteByUrl(url)
     }
 }

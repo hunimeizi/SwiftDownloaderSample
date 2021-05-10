@@ -12,7 +12,7 @@ class DownloadResponseBody(
     val downloadController: DownloadController
 ) :
     ResponseBody() {
-    private val bufferedSource: BufferedSource by lazy { Okio.buffer(source(responseBody.source())) }
+    private val bufferedSource: BufferedSource by lazy { source(responseBody.source()).buffer() }
 
     override fun contentLength(): Long = responseBody.contentLength()
 

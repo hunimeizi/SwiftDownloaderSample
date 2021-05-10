@@ -16,7 +16,7 @@ class ProgressInterceptor(
         return originalResponse.newBuilder()
             .body(
                 DownloadResponseBody(
-                    originalResponse.body()!!,
+                    originalResponse.body!!,
                     listener,
                     downloadController
                 )

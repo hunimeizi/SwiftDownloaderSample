@@ -2,6 +2,7 @@ package com.haolin.swift.downloader.library.core.downloader
 
 import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import com.haolin.swift.downloader.library.core.SwiftDownloader
 import com.haolin.swift.downloader.library.core.controller.DownloadController
 import com.haolin.swift.downloader.library.core.listener.IDownloadListener
@@ -25,9 +26,17 @@ interface IDownloader {
     var downloadingTask: TaskInfo?
     val okHttpClient: OkHttpClient
     val downloadListener: IDownloadListener
-    fun enqueue(url: String, filePath: String, fileName: String) {
+    fun enqueue(singleTask: Boolean, url: String, filePath: String, fileName: String) {
         scope.launch(Dispatchers.IO) {
             try {
+                if (singleTask) {
+                    val taskInfo = taskManager.findByUrls(url)
+                    if (taskInfo != null) {
+                        Log.e("lyb=====", "任务已存在")
+                        resumeAndStart()
+                        return@launch
+                    }
+                }
                 val taskInfo = TaskInfo(
                     System.currentTimeMillis(),
                     fileName,
@@ -59,7 +68,7 @@ interface IDownloader {
             val request = OkHttpManager.createRequest(task)
             val response = okHttpClient.newCall(request).execute()
             writeFileInDisk(
-                response.body()!!,
+                response.body!!,
                 File(task.filePath, task.fileName),
                 task.status == TASK_STATUS_UNFINISHED
             )
@@ -80,6 +89,7 @@ interface IDownloader {
     }
 
     fun resumeAndStart() {
+        if (!downloadController.isPause()) return
         scope.launch(Dispatchers.IO) {
             queryUnfinishedTaskInfo().let {
                 if (it.isNotEmpty()) {
@@ -92,12 +102,17 @@ interface IDownloader {
         }
     }
 
-
+    fun deleteByUrl(url: String){
+        scope.launch(Dispatchers.IO) {
+            taskManager.deleteAllTaskInfo()
+            //downloadController.start()
+        }
+    }
     fun cancelAll() {
         downloadController.pause()
         scope.launch(Dispatchers.IO) {
             Log.d(TAG, "cancelAll deleteTaskInfoArray: ${getDownloadQueueArray()}")
-            taskManager.deleteAllUnfinishedTaskInfo()
+            taskManager.deleteAllTaskInfo()
             downloadQueue.forEach {
                 clearCache(it)
             }
@@ -251,6 +266,7 @@ interface IDownloader {
             }
         }
     }
+
     fun close()
 
 }

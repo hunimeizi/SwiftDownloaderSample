@@ -19,7 +19,7 @@ import java.util.*
 import java.util.concurrent.ConcurrentLinkedQueue
 
 const val NOTIFICATION_FOREGROUND_SERVICE_ID = 2888
-class ForegroundServiceDownloader() : LifecycleService(), IDownloader {
+class ForegroundServiceDownloader : LifecycleService(), IDownloader {
     val tag = "ForegroundService"
     override lateinit var appContext: Context
     override val scope: CoroutineScope = lifecycleScope
