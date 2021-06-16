@@ -9,7 +9,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.haolin.swift.downloader.library.R
 
-const val CHANNEL_NAME = "SwiftDownloaderNotification"
+const val CHANNEL_NAME = "FileDownloadNotification"
 
 const val NOTIFICATION_PROGRESS_MAX = 100
 const val NOTIFICATION_DOWNLOAD_ID = 2234
