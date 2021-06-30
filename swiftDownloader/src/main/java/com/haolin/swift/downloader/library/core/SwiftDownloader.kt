@@ -33,6 +33,7 @@ object SwiftDownloader {
 
     var onDownloadError: (Exception) -> Unit = {}
     var onDownloadProgressChange: (Long) -> Unit = {}
+    var onDownloadSpeed: (String) -> Unit = {}
     var onDownloadStop: (Long, Long) -> Unit = { _: Long, _: Long -> }
     var onDownloadFinished: (String, String) -> Unit = { _: String, _: String -> }
 
@@ -93,6 +94,9 @@ object SwiftDownloader {
     fun deleteByUrl(url: String) {
         realDownloader?.deleteByUrl(url)
     }
+    fun deleteAllTaskInfo(){
+        realDownloader?.deleteAllTaskInfo()
+    }
     fun cancelAll() {
         realDownloader?.cancelAll()
     }
@@ -112,6 +116,10 @@ object SwiftDownloader {
 
     fun setOnProgressChange(onProgressChange: (Long) -> Unit): SwiftDownloader {
         onDownloadProgressChange = onProgressChange
+        return this
+    }
+    fun setOnDownloadSpeed(speed: (String) -> Unit): SwiftDownloader {
+        onDownloadSpeed = speed
         return this
     }
 

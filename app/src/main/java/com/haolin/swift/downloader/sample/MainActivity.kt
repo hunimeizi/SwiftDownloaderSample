@@ -20,6 +20,7 @@ import com.haolin.swift.downloader.library.core.sender.NotificationSender
 import com.haolin.swift.downloader.library.tool.PathSelector
 import com.haolin.swift.downloader.library.tool.isApkFile
 import java.io.File
+import kotlin.math.log
 
 
 class MainActivity : AppCompatActivity() {
@@ -80,8 +81,10 @@ class MainActivity : AppCompatActivity() {
                         intent.setDataAndType(uri, "application/vnd.android.package-archive")
                         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                     }
-                    val pendingIntent = PendingIntent.getActivities(this@MainActivity,0,
-                        arrayOf(intent),PendingIntent.FLAG_UPDATE_CURRENT)
+                    val pendingIntent = PendingIntent.getActivities(
+                        this@MainActivity, 0,
+                        arrayOf(intent), PendingIntent.FLAG_UPDATE_CURRENT
+                    )
                     NotificationCompat.Builder(context, resources.getString(R.string.app_name))
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContent(remoteViews)
@@ -121,6 +124,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun gotoDown() {
+        SwiftDownloader.deleteAllTaskInfo()
         val url = "https://storage.jd.com/jdmobile/JDMALL-PC2.apk"
         //获取应用外部照片储存路径
         val filePath = PathSelector(applicationContext).getDownloadsDirPath()
@@ -131,22 +135,26 @@ class MainActivity : AppCompatActivity() {
             progressCircular.progress = progress.toInt()
             tvProgress.text = "已下载$progress%"
             //do something...
-        }.setOnStop { downloadBytes, totalBytes ->
-            Toast.makeText(this, "下载暂停", Toast.LENGTH_SHORT).show()
-            //do something...
-        }.setOnFinished { filePath, fileName ->
-            SwiftDownloader.deleteByUrl(url)
-            Toast.makeText(this, "下载完成", Toast.LENGTH_SHORT).show()
-            progressCircular.progress = 100
-            tvProgress.text = "下载完成"
-            Log.e("lyb========下载路径==", "$filePath/$fileName")
-            installUseAS(this, "$filePath/$fileName")
-            //do something...
-        }.setOnError { exception ->
-            SwiftDownloader.cancelAll()
-            //do something...
-            Toast.makeText(this, "下载错误", Toast.LENGTH_SHORT).show()
+        }.setOnDownloadSpeed {
+            Log.e("lyb======", "下载速度:$it")
         }
+            .setOnStop { downloadBytes, totalBytes ->
+                Toast.makeText(this, "下载暂停", Toast.LENGTH_SHORT).show()
+                //do something...
+            }.setOnFinished { filePath, fileName ->
+                SwiftDownloader.deleteByUrl(url)
+                Toast.makeText(this, "下载完成", Toast.LENGTH_SHORT).show()
+                progressCircular.progress = 100
+                tvProgress.text = "下载完成"
+                Log.e("lyb========下载路径==", "$filePath/$fileName")
+                installUseAS(this, "$filePath/$fileName")
+                //do something...
+            }.setOnError { exception ->
+                SwiftDownloader.cancelAll()
+                SwiftDownloader.deleteByUrl(url)
+                //do something...
+                Toast.makeText(this, "下载错误", Toast.LENGTH_SHORT).show()
+            }
     }
 
     private fun installUseAS(mContext: Context, filePath: String) {
@@ -169,7 +177,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        if (isDownSuccess)
-            SwiftDownloader.cancelAll()
+        SwiftDownloader.cancelAll()
     }
+
 }

@@ -2,7 +2,6 @@ package com.haolin.swift.downloader.library.core.downloader
 
 import android.content.Context
 import android.util.Log
-import android.widget.Toast
 import com.haolin.swift.downloader.library.core.SwiftDownloader
 import com.haolin.swift.downloader.library.core.controller.DownloadController
 import com.haolin.swift.downloader.library.core.listener.IDownloadListener
@@ -14,7 +13,11 @@ import com.haolin.swift.downloader.library.tool.writeFileInDisk
 import kotlinx.coroutines.*
 import okhttp3.OkHttpClient
 import java.io.File
-import java.util.Queue
+import java.text.DecimalFormat
+import java.util.*
+import kotlin.math.log
+import kotlin.math.log10
+import kotlin.math.pow
 
 interface IDownloader {
     var appContext: Context
@@ -102,12 +105,18 @@ interface IDownloader {
         }
     }
 
-    fun deleteByUrl(url: String){
+    fun deleteByUrl(url: String) {
         scope.launch(Dispatchers.IO) {
-            taskManager.deleteAllTaskInfo()
-            //downloadController.start()
+            taskManager.deleteByUrl(url)
         }
     }
+
+    fun deleteAllTaskInfo() {
+        scope.launch(Dispatchers.IO) {
+            taskManager.deleteAllTaskInfo()
+        }
+    }
+
     fun cancelAll() {
         downloadController.pause()
         scope.launch(Dispatchers.IO) {
@@ -200,7 +209,10 @@ interface IDownloader {
 
     fun createListener(): IDownloadListener = object : IDownloadListener {
         var progress = 0L
+        var startTime = System.currentTimeMillis()
+        var lastTotalRxBytes: Long = 0
         override fun onProgressChange(downloadBytes: Long, totalBytes: Long) {
+            val curTime = System.currentTimeMillis()
             val newProgress =
                 (downloadingTask!!.downloadedBytes + downloadBytes) * 100 / if (downloadingTask!!.status == TASK_STATUS_UNINITIALIZED) totalBytes else downloadingTask!!.totalBytes
             if (progress != newProgress && newProgress < 100L) {
@@ -214,6 +226,12 @@ interface IDownloader {
                 scope.launch(Dispatchers.Main) {
                     SwiftDownloader.onDownloadProgressChange(progress)
                 }
+                val size = (downloadBytes - lastTotalRxBytes) / (curTime - startTime) * 1000
+                scope.launch(Dispatchers.Main) {
+                    SwiftDownloader.onDownloadSpeed(readableFileSize(size))
+                }
+                lastTotalRxBytes = downloadBytes
+                startTime = curTime
             } else if (progress != newProgress && newProgress == 100L) {
                 onFinish(downloadBytes, totalBytes)
             }
@@ -269,4 +287,11 @@ interface IDownloader {
 
     fun close()
 
+    fun readableFileSize(size: Long): String {
+        if (size <= 0) return "0KB/S"
+        val units = arrayOf("B", "KB", "MB", "GB", "TB")
+        val digitGroups = (log10(size.toDouble()) / log10(1024.0)).toInt()
+        return DecimalFormat("#,##0.#").format(size / 1024.0.pow(digitGroups.toDouble()))
+            .toString() + " " + units[digitGroups] + "/S"
+    }
 }
