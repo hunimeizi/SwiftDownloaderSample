@@ -102,13 +102,27 @@ class MainActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btnDown).setOnClickListener {
-            ActivityCompat.requestPermissions(
-                this, arrayOf(
-                    Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ), 1
-            )
+            val url = "https://storage.jd.com/jdmobile/JDMALL-PC2.apk"
+            //获取应用外部照片储存路径
+            val filePath = PathSelector(applicationContext).getDownloadsDirPath()
+            val fileName = "jd.apk"
+            //加入下载队列
+            SwiftDownloader.enqueue(false, url, filePath, fileName)
         }
+
+        findViewById<Button>(R.id.btnDown2).setOnClickListener {
+            val url = "https://storage.jd.com/jdmobile/JDMALL-PC2.apk"
+            //获取应用外部照片储存路径
+            val filePath = PathSelector(applicationContext).getDownloadsDirPath()
+            val fileName = "jd1.apk"
+            SwiftDownloader.enqueue(false, url, filePath, fileName)
+        }
+        ActivityCompat.requestPermissions(
+            this, arrayOf(
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ), 1
+        )
     }
 
     override fun onRequestPermissionsResult(
@@ -125,12 +139,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun gotoDown() {
         SwiftDownloader.deleteAllTaskInfo()
-        val url = "https://storage.jd.com/jdmobile/JDMALL-PC2.apk"
-        //获取应用外部照片储存路径
-        val filePath = PathSelector(applicationContext).getDownloadsDirPath()
-        val fileName = "jd.apk"
-        //加入下载队列
-        SwiftDownloader.enqueue(true, url, filePath, fileName)
+
         SwiftDownloader.setOnProgressChange { progress ->
             progressCircular.progress = progress.toInt()
             tvProgress.text = "已下载$progress%"
@@ -142,16 +151,16 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this, "下载暂停", Toast.LENGTH_SHORT).show()
                 //do something...
             }.setOnFinished { filePath, fileName ->
-                SwiftDownloader.deleteByUrl(url)
+//                SwiftDownloader.deleteByUrl(url)
                 Toast.makeText(this, "下载完成", Toast.LENGTH_SHORT).show()
                 progressCircular.progress = 100
                 tvProgress.text = "下载完成"
                 Log.e("lyb========下载路径==", "$filePath/$fileName")
-                installUseAS(this, "$filePath/$fileName")
+//                installUseAS(this, "$filePath/$fileName")
                 //do something...
             }.setOnError { exception ->
                 SwiftDownloader.cancelAll()
-                SwiftDownloader.deleteByUrl(url)
+//                SwiftDownloader.deleteByUrl(url)
                 //do something...
                 Toast.makeText(this, "下载错误", Toast.LENGTH_SHORT).show()
             }

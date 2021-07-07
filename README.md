@@ -49,7 +49,7 @@ repositories {
 }
 
 dependencies {
-  implementation 'io.github.hunimeizi:haolinSwiftDownloader:1.0.1'
+  implementation 'io.github.hunimeizi:haolinSwiftDownloader:1.0.2'
 }
 
 ```
