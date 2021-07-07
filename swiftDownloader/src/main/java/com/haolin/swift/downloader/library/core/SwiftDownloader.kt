@@ -18,7 +18,7 @@ object SwiftDownloader {
     //设置
     val option by lazy { SwiftDownloaderOption() }
 
-    private var realDownloader: IDownloader?=null
+    private var realDownloader: IDownloader? = null
 
     private val serviceConnection = object : ServiceConnection {
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -35,7 +35,7 @@ object SwiftDownloader {
     var onDownloadProgressChange: (Long) -> Unit = {}
     var onDownloadSpeed: (String) -> Unit = {}
     var onDownloadStop: (Long, Long) -> Unit = { _: Long, _: Long -> }
-    var onDownloadFinished: (String, String) -> Unit = { _: String, _: String -> }
+    var onDownloadFinished: (String, String, Long) -> Unit = { _: String, _: String, _: Long -> }
 
 
     lateinit var notificationSender: NotificationSender
@@ -78,8 +78,13 @@ object SwiftDownloader {
 
     }
 
-    fun enqueue(singleTask: Boolean,url: String, filePath: String, fileName: String): SwiftDownloader {
-        realDownloader?.enqueue(singleTask,url, filePath, fileName)
+    fun enqueue(
+        singleTask: Boolean,
+        url: String,
+        filePath: String,
+        fileName: String
+    ): SwiftDownloader {
+        realDownloader?.enqueue(singleTask, url, filePath, fileName)
         return this
     }
 
@@ -94,9 +99,11 @@ object SwiftDownloader {
     fun deleteByUrl(url: String) {
         realDownloader?.deleteByUrl(url)
     }
-    fun deleteAllTaskInfo(){
+
+    fun deleteAllTaskInfo() {
         realDownloader?.deleteAllTaskInfo()
     }
+
     fun cancelAll() {
         realDownloader?.cancelAll()
     }
@@ -118,6 +125,7 @@ object SwiftDownloader {
         onDownloadProgressChange = onProgressChange
         return this
     }
+
     fun setOnDownloadSpeed(speed: (String) -> Unit): SwiftDownloader {
         onDownloadSpeed = speed
         return this
@@ -128,7 +136,7 @@ object SwiftDownloader {
         return this
     }
 
-    fun setOnFinished(onFinished: (String, String) -> Unit): SwiftDownloader {
+    fun setOnFinished(onFinished: (String, String, Long) -> Unit): SwiftDownloader {
         onDownloadFinished = onFinished
         return this
     }

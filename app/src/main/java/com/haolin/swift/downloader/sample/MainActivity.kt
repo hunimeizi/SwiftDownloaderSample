@@ -150,12 +150,13 @@ class MainActivity : AppCompatActivity() {
             .setOnStop { downloadBytes, totalBytes ->
                 Toast.makeText(this, "下载暂停", Toast.LENGTH_SHORT).show()
                 //do something...
-            }.setOnFinished { filePath, fileName ->
+            }.setOnFinished { filePath, fileName,totalBytes ->
 //                SwiftDownloader.deleteByUrl(url)
                 Toast.makeText(this, "下载完成", Toast.LENGTH_SHORT).show()
                 progressCircular.progress = 100
                 tvProgress.text = "下载完成"
                 Log.e("lyb========下载路径==", "$filePath/$fileName")
+                Log.e("lyb========总大小==", "$totalBytes")
 //                installUseAS(this, "$filePath/$fileName")
                 //do something...
             }.setOnError { exception ->

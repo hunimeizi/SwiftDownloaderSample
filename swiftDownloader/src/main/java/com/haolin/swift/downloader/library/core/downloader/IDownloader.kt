@@ -279,7 +279,8 @@ interface IDownloader {
             scope.launch(Dispatchers.Main) {
                 SwiftDownloader.onDownloadFinished(
                     task?.filePath ?: "null",
-                    task?.fileName ?: "null"
+                    task?.fileName ?: "null",
+                    totalBytes
                 )
             }
         }
