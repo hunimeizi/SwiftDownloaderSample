@@ -5,6 +5,7 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.haolin.swift.downloader.library.R
@@ -32,11 +33,14 @@ class DefaultNotificationSender(context: Context) : NotificationSender(context) 
     }
 
     private fun createPendingIntent(context: Context, intent: Intent): PendingIntent? =
-        PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        PendingIntent.getBroadcast(context,
+            0,
+            intent,
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_UPDATE_CURRENT)
 
 
     override fun buildDownloadProgressNotification(progress: Int, fileName: String): Notification {
-        return NotificationCompat.Builder(context, channelID)
+        return NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download)
             .addAction(
                 R.drawable.ic_baseline_pause,
@@ -62,7 +66,7 @@ class DefaultNotificationSender(context: Context) : NotificationSender(context) 
     }
 
     override fun buildDownloadStopNotification(fileName: String): Notification {
-        return NotificationCompat.Builder(context, channelID)
+        return NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download)
             .addAction(
                 R.drawable.ic_baseline_play_arrow,
@@ -85,11 +89,11 @@ class DefaultNotificationSender(context: Context) : NotificationSender(context) 
         }
         val openPendingIntent =
             createPendingIntent(context, openFileIntent)
-        return NotificationCompat.Builder(context, channelID)
+        return NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download)
             .setContentTitle("$fileName ${context.getString(R.string.done)}")
             .setContentText(fileName)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(openPendingIntent)
             .setAutoCancel(true)
             .build()

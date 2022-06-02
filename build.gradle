@@ -2,14 +2,20 @@
 apply plugin: 'io.codearte.nexus-staging'
 buildscript {
     ext {
-        versionName = '1.0.3'
-        versionCode = 4
+        versionName = '1.0.4'
+        versionCode = 5
         kotlin_version = "1.4.32"
     }
     repositories {
         google()
         mavenCentral()
         maven { url "https://jitpack.io" }
+        maven {
+            url "https://maven-other.tuya.com/repository/maven-releases/"
+        }
+        maven{ url 'https://maven.aliyun.com/repository/central'}
+        maven{ url 'https://maven.aliyun.com/nexus/content/groups/public/'}
+        maven {url 'https://developer.huawei.com/repo/'}
     }
     dependencies {
         classpath "com.android.tools.build:gradle:4.1.3"
@@ -28,8 +34,11 @@ allprojects {
         mavenCentral()
         maven { url "https://jitpack.io" }
         maven {
-            url 'https://dl.bintray.com/novoda-oss/snapshots/'
+            url "https://maven-other.tuya.com/repository/maven-releases/"
         }
+        maven{ url 'https://maven.aliyun.com/repository/central'}
+        maven{ url 'https://maven.aliyun.com/nexus/content/groups/public/'}
+        maven {url 'https://developer.huawei.com/repo/'}
     }
 }
 

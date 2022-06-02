@@ -2,10 +2,13 @@ package com.haolin.swift.downloader.sample
 
 import android.Manifest
 import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -16,11 +19,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.FileProvider
 import com.haolin.swift.downloader.library.core.SwiftDownloader
+import com.haolin.swift.downloader.library.core.sender.DOWNLOAD_CHANNEL_ID
 import com.haolin.swift.downloader.library.core.sender.NotificationSender
 import com.haolin.swift.downloader.library.tool.PathSelector
 import com.haolin.swift.downloader.library.tool.isApkFile
 import java.io.File
-import kotlin.math.log
 
 
 class MainActivity : AppCompatActivity() {
@@ -31,10 +34,10 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-
         SwiftDownloader.initWithServiceMode(application)
         SwiftDownloader.option.showNotification = true
         val remoteViews = RemoteViews(packageName, R.layout.notify_download)
+        val remoteViewsCustom = RemoteViews(packageName, R.layout.notify_download_custom)
         SwiftDownloader.notificationSender = object : NotificationSender(applicationContext) {
             //创建显示任务下载进度的Notification
             override fun buildDownloadProgressNotification(
@@ -43,18 +46,26 @@ class MainActivity : AppCompatActivity() {
             ): Notification {
                 remoteViews.setProgressBar(R.id.pb_progress, 100, progress, false)
                 remoteViews.setTextViewText(R.id.tv_progress, "已下载$progress%")
-                return NotificationCompat.Builder(context, resources.getString(R.string.app_name))
+                remoteViewsCustom.setTextViewText(R.id.tv_progress, "已下载$progress%")
+                return NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContent(remoteViews)
+                    .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                    .setCustomContentView(remoteViewsCustom)
+                    .setCustomBigContentView(remoteViews)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .build()
             }
 
             //创建显示任务下载停止的Notification
             override fun buildDownloadStopNotification(fileName: String): Notification {
-                return NotificationCompat.Builder(context, resources.getString(R.string.app_name))
+                remoteViewsCustom.setTextViewText(R.id.tv_progress, "下载停止")
+                return NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setContent(remoteViews)
+                    .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                    .setCustomContentView(remoteViewsCustom)
+                    .setCustomBigContentView(remoteViews)
                     .setPriority(NotificationCompat.PRIORITY_HIGH)
                     .build()
             }
@@ -66,6 +77,7 @@ class MainActivity : AppCompatActivity() {
             ): Notification {
                 remoteViews.setProgressBar(R.id.pb_progress, 100, 100, false)
                 remoteViews.setTextViewText(R.id.tv_progress, "下载完成")
+                remoteViewsCustom.setTextViewText(R.id.tv_progress, "下载完成")
                 return if (isApkFile(fileName)) {
                     val file = File("$filePath/$fileName")
                     val uri = Uri.fromFile(file)
@@ -83,18 +95,24 @@ class MainActivity : AppCompatActivity() {
                     }
                     val pendingIntent = PendingIntent.getActivities(
                         this@MainActivity, 0,
-                        arrayOf(intent), PendingIntent.FLAG_UPDATE_CURRENT
+                        arrayOf(intent),  if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_UPDATE_CURRENT
                     )
-                    NotificationCompat.Builder(context, resources.getString(R.string.app_name))
+                    NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContent(remoteViews)
+                        .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                        .setCustomContentView(remoteViewsCustom)
+                        .setCustomBigContentView(remoteViews)
                         .setContentIntent(pendingIntent)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .build()
                 } else {
-                    NotificationCompat.Builder(context, resources.getString(R.string.app_name))
+                    NotificationCompat.Builder(context, DOWNLOAD_CHANNEL_ID)
                         .setSmallIcon(R.mipmap.ic_launcher)
                         .setContent(remoteViews)
+                        .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+                        .setCustomContentView(remoteViewsCustom)
+                        .setCustomBigContentView(remoteViews)
                         .setPriority(NotificationCompat.PRIORITY_HIGH)
                         .build()
                 }

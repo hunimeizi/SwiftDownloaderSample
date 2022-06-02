@@ -131,62 +131,71 @@ override 抽象类NotificationSender 的三个方法
 
 kotlin:
 ```kotlin
- SwiftDownloader.setNotificationSender(object : NotificationSender(applicationContext) {
-                //创建显示任务下载进度的Notification
-                override fun buildDownloadProgressNotification(
-                    progress: Int,
-                    fileName: String
-                ): Notification {
-                    return NotificationCompat.Builder(context, CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_baseline_adb_24)
-                        .setContentTitle("$fileName 下载中")
-                        .setContentText("$progress%")
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .build()
-                }
+ SwiftDownloader.notificationSender = object : NotificationSender(applicationContext) {
+    //创建显示任务下载进度的Notification
+    override fun buildDownloadProgressNotification(
+        progress: Int,
+        fileName: String
+    ): Notification {
+        remoteViews.setProgressBar(R.id.pb_progress, 100, progress, false)
+        remoteViews.setTextViewText(R.id.tv_progress, "已下载$progress%")
+        return NotificationCompat.Builder(context, resources.getString(R.string.app_name))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContent(remoteViews)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+    }
 
-                //创建显示任务下载停止的Notification
-                override fun buildDownloadStopNotification(fileName: String): Notification {
-                    return NotificationCompat.Builder(context, CHANNEL_ID)
-                        .setSmallIcon(R.drawable.ic_baseline_adb_24)
-                        .setContentTitle("$fileName Stop")
-                        .setContentText("Stop")
-                        .setPriority(NotificationCompat.PRIORITY_HIGH)
-                        .build()
-                }
+    //创建显示任务下载停止的Notification
+    override fun buildDownloadStopNotification(fileName: String): Notification {
+        return NotificationCompat.Builder(context, resources.getString(R.string.app_name))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContent(remoteViews)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .build()
+    }
 
-                //创建显示任务下载完成的Notification
-                override fun buildDownloadDoneNotification(
-                    filePath: String,
-                    fileName: String
-                ): Notification {
-                    Log.d(TAG, "buildDownloadDoneNotification: start")
-                    return if (isImageFile(fileName)) {
-                        val bitmap =
-                            BitmapFactory.decodeFile("$filePath/$fileName")
-                        Log.d(TAG, "buildDownloadDoneNotification: done")
-                        NotificationCompat.Builder(context, CHANNEL_ID)
-                            .setSmallIcon(R.drawable.ic_baseline_adb_24)
-                            .setContentTitle("$fileName Done")
-                            .setContentText("Done")
-                            .setStyle(
-                                NotificationCompat.BigPictureStyle()
-                                    .bigPicture(bitmap)
-                                    .bigLargeIcon(null)
-                            )
-                            .setPriority(NotificationCompat.PRIORITY_HIGH)
-                            .build()
-
-                    } else {
-                        NotificationCompat.Builder(context, CHANNEL_ID)
-                            .setSmallIcon(R.drawable.ic_baseline_adb_24)
-                            .setContentTitle("$fileName Done")
-                            .setContentText("Done")
-                            .setPriority(NotificationCompat.PRIORITY_HIGH)
-                            .build()
-                    }
-                }
-            })
+    //创建显示任务下载完成的Notification
+    override fun buildDownloadDoneNotification(
+        filePath: String,
+        fileName: String
+    ): Notification {
+        remoteViews.setProgressBar(R.id.pb_progress, 100, 100, false)
+        remoteViews.setTextViewText(R.id.tv_progress, "下载完成")
+        return if (isApkFile(fileName)) {
+            val file = File("$filePath/$fileName")
+            val uri = Uri.fromFile(file)
+            val intent = Intent(Intent.ACTION_VIEW)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                val contentUri = FileProvider.getUriForFile(
+                    this@MainActivity, BuildConfig.APPLICATION_ID + ".fileprovider", file
+                )
+                intent.setDataAndType(contentUri, "application/vnd.android.package-archive")
+            } else {
+                intent.setDataAndType(uri, "application/vnd.android.package-archive")
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+            val pendingIntent = PendingIntent.getActivities(
+                this@MainActivity, 0,
+                arrayOf(intent),  if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT else PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            NotificationCompat.Builder(context, resources.getString(R.string.app_name))
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContent(remoteViews)
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build()
+        } else {
+            NotificationCompat.Builder(context, resources.getString(R.string.app_name))
+                .setSmallIcon(R.mipmap.ic_launcher)
+                .setContent(remoteViews)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .build()
+        }
+    }
+}
 ```
 
 _(通过setNotificationSender()设置的通知栏)_

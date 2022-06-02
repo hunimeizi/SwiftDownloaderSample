@@ -4,19 +4,19 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.Context
+import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.haolin.swift.downloader.library.R
 
-const val CHANNEL_NAME = "FileDownloadNotification"
-
+const val CHANNEL_NAME = "download"
+const val DOWNLOAD_CHANNEL_ID = "NotificationSender"
 const val NOTIFICATION_PROGRESS_MAX = 100
 const val NOTIFICATION_DOWNLOAD_ID = 2234
 const val NOTIFICATION_DONE_ID = 2277
 
 abstract class NotificationSender(protected val context: Context) {
-    protected val channelID: String = this.javaClass.name
     val descriptionText = context.getString(R.string.notification_description)
     abstract fun buildDownloadProgressNotification(progress: Int, fileName: String): Notification
 
@@ -31,12 +31,20 @@ abstract class NotificationSender(protected val context: Context) {
      */
     fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val importance = NotificationManager.IMPORTANCE_LOW
-            val channel = NotificationChannel(channelID, CHANNEL_NAME, importance)
-                .apply { description = descriptionText }
-            val notificationManager: NotificationManager =
+            val mNotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            notificationManager.createNotificationChannel(channel)
+            val importance = NotificationManager.IMPORTANCE_HIGH
+            val mChannel = NotificationChannel(DOWNLOAD_CHANNEL_ID, CHANNEL_NAME, importance)
+            // 配置通知渠道的属性
+            mChannel.description = descriptionText
+            // 设置通知出现时的闪灯（如果 android 设备支持的话）
+            mChannel.enableLights(true)
+            mChannel.lightColor = Color.RED
+            // 设置通知出现时的震动（如果 android 设备支持的话）
+            mChannel.enableVibration(true)
+            mChannel.vibrationPattern = longArrayOf(100, 200, 300)
+            //最后在notificationmanager中创建该通知渠道
+            mNotificationManager.createNotificationChannel(mChannel)
         }
     }
 
@@ -58,13 +66,5 @@ abstract class NotificationSender(protected val context: Context) {
     fun showDownloadProgressNotification(progress: Int, fileName: String) {
         val notification = buildDownloadProgressNotification(progress, fileName)
         NotificationManagerCompat.from(context).notify(NOTIFICATION_DOWNLOAD_ID, notification)
-    }
-    open fun buildForegroundServiceNotification(): Notification {
-        return NotificationCompat.Builder(context, channelID)
-            .setSmallIcon(R.drawable.ic_download)
-            .setContentTitle(context.getString(R.string.download_service))
-            .setContentText(context.getString(R.string.downloader_ready))
-            .setPriority(NotificationCompat.PRIORITY_LOW)
-            .build()
     }
 }
