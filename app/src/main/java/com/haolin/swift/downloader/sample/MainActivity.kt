@@ -36,8 +36,8 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         SwiftDownloader.initWithServiceMode(application)
         SwiftDownloader.option.showNotification = true
-        val remoteViews = RemoteViews(packageName, R.layout.notify_download)
-        val remoteViewsCustom = RemoteViews(packageName, R.layout.notify_download_custom)
+        val remoteViews = RemoteViews(packageName, R.layout.notify_download) // Android12 展开布局
+        val remoteViewsCustom = RemoteViews(packageName, R.layout.notify_download_custom) // Android12收起后通知的布局
         SwiftDownloader.notificationSender = object : NotificationSender(applicationContext) {
             //创建显示任务下载进度的Notification
             override fun buildDownloadProgressNotification(
