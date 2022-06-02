@@ -33,7 +33,7 @@ abstract class NotificationSender(protected val context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val mNotificationManager =
                 context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            val importance = NotificationManager.IMPORTANCE_HIGH
+            val importance = NotificationManager.IMPORTANCE_LOW
             val mChannel = NotificationChannel(DOWNLOAD_CHANNEL_ID, CHANNEL_NAME, importance)
             // 配置通知渠道的属性
             mChannel.description = descriptionText
