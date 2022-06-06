@@ -1,11 +1,7 @@
 package com.haolin.swift.downloader.sample
 
 import android.Manifest
-import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
-import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -22,7 +18,6 @@ class MainActivity : AppCompatActivity() {
 
     private val progressCircular by lazy { findViewById<ProgressBar>(R.id.progress_circular) }
     private val tvProgress by lazy { findViewById<TextView>(R.id.tvProgress) }
-    private var isDownSuccess = false
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
