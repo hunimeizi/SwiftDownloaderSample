@@ -32,6 +32,7 @@ fun FragmentActivity.configuration() {
             remoteViewsCustom.setTextViewText(R.id.tv_progress, "已下载$progress%")
             return NotificationCompat.Builder(this@configuration, DOWNLOAD_CHANNEL_ID)
                 .setSmallIcon(R.mipmap.ic_launcher)
+                .setOnlyAlertOnce(true)
                 .setStyle(NotificationCompat.DecoratedCustomViewStyle())
                 .setCustomContentView(remoteViewsCustom)
                 .setCustomBigContentView(remoteViews)
